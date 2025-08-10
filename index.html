@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pembayaran QR DANA</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #0f172a, #1e293b);
+      color: white;
+      text-align: center;
+      padding: 20px;
+      animation: fadeIn 1s ease-in-out;
+    }
+    .container {
+      max-width: 420px;
+      margin: auto;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      animation: slideUp 1s ease-in-out;
+    }
+    img.qr {
+      width: 100%;
+      max-width: 350px;
+      border-radius: 12px;
+      animation: zoomIn 1s ease-in-out;
+    }
+    .amount {
+      font-size: 1.5em;
+      margin-top: 10px;
+      font-weight: bold;
+      color: #38bdf8;
+    }
+    .note {
+      margin-top: 10px;
+      font-size: 0.9em;
+      color: #94a3b8;
+    }
+    .btn, .copy-btn {
+      display: inline-block;
+      margin-top: 15px;
+      padding: 10px 20px;
+      background: #38bdf8;
+      color: #0f172a;
+      font-weight: bold;
+      border-radius: 8px;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .btn:hover, .copy-btn:hover {
+      background: #0ea5e9;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes slideUp {
+      from { transform: translateY(30px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    @keyframes zoomIn {
+      from { transform: scale(0.8); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Pembayaran via DANA</h1>
+    <p>Scan QR Code di bawah untuk melakukan pembayaran</p>
+    <img src="https://files.catbox.moe/wulurg.jpg" alt="QR Code DANA" class="qr">
+    <div class="amount" id="dana-number">0895704333683</div>
+    <button class="copy-btn" onclick="copyDana()">Copy Nomor DANA</button>
+    <div class="note">Pastikan nominal benar sebelum bayar</div>
+    <a class="btn" href="https://link.dana.id/qr/0895704333683" target="_blank">Buka DANA</a>
+  </div>
+
+  <script>
+    function copyDana() {
+      const danaNumber = document.getElementById("dana-number").innerText;
+      navigator.clipboard.writeText(danaNumber).then(() => {
+        alert("Nomor DANA berhasil disalin!");
+      });
+    }
+  </script>
+</body>
+  </html>
