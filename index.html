@@ -1,210 +1,231 @@
- <!doctype html>
-<html lang="en">
+<!doctype html>
+
+<html lang="id">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>!! WARNING !!</title>
-<style>
-  :root{
-    --bg:#0b0f13;
-    --scan:#22c1c3;
-    --danger:#ff3b30;
-    --muted:#9aa6b2;
-  }
-  html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;}
-  body{
-    background: radial-gradient(ellipse at top left,#071018 0%, #020405 60%);
-    color: #e6eef3;
-    display:flex;align-items:center;justify-content:center;
-  }
-  .frame{
-    width:92%;
-    max-width:920px;
-    border-radius:12px;
-    background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
-    box-shadow: 0 10px 40px rgba(2,6,10,0.7);
-    padding:28px;
-    position:relative;
-    overflow:hidden;
-  }
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Belajar Matematika Dasar — Lengkap (Azmil)</title>
+  <style>
+    :root{--bg1:#e8f5ff;--bg2:#ffffff;--card:#ffffff;--accent:#186fa3;--muted:#6b7280}
+    html,body{height:100%;}
+    body{font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; background:linear-gradient(180deg,var(--bg1),var(--bg2)); color:#0f172a; margin:0; padding:28px;}
+    .container{max-width:1100px;margin:0 auto}
+    header{display:flex;align-items:center;gap:18px}
+    h1{margin:0;font-size:30px}
+    p.lead{color:var(--muted);margin:6px 0 18px}
+    .card{background:var(--card);border-radius:14px;padding:18px;box-shadow:0 6px 18px rgba(12,18,31,0.06);}
+    .row{display:grid;grid-template-columns:1fr 380px;gap:20px}
+    .example{font-size:16px;padding:12px;border-radius:10px;background:linear-gradient(180deg,#fbfdff,#f7fbfc)}
+    .steps{margin-top:8px}
+    .steps li{margin:6px 0}
+    .calc{display:flex;flex-direction:column;gap:10px}input[type=number], input[type=text]{padding:10px;border-radius:8px;border:1px solid #e6eef2;font-size:16px}
+.btn{background:var(--accent);color:#fff;padding:10px 14px;border-radius:10px;border:0;cursor:pointer;font-weight:600}
+.row-buttons{display:flex;flex-wrap:wrap;gap:8px}
+.result{margin-top:8px;padding:12px;border-radius:8px;background:#f0fbff;border:1px solid rgba(24,111,163,0.08)}
 
-  .header{
-    display:flex;align-items:center;gap:14px;margin-bottom:16px;
-  }
-  .logo{
-    width:56px;height:56px;border-radius:10px;background:linear-gradient(135deg,var(--scan),#8be6c9);
-    display:flex;align-items:center;justify-content:center;color:#002f2f;font-weight:800;font-size:18px;
-    box-shadow: 0 6px 24px rgba(34,193,195,0.12), inset 0 -6px 10px rgba(0,0,0,0.12);
-  }
+footer{margin-top:18px;color:var(--muted);font-size:13px}
+.hint{color:var(--muted);font-size:14px}
+.geom{display:flex;gap:12px;align-items:center}
+svg{max-width:100%;height:auto}
+@media (max-width:980px){.row{grid-template-columns:1fr} .container{padding:12px}}
 
-  h1{margin:0;font-size:20px;letter-spacing:0.6px}
-  p.lead{margin:6px 0 0;color:var(--muted);font-size:13px}
-
-  .big-warning{
-    margin:18px 0;
-    background: linear-gradient(90deg, rgba(255,59,48,0.12), rgba(34,193,195,0.06));
-    border-radius:8px;padding:16px;display:flex;align-items:center;gap:14px;
-    border:1px solid rgba(255,255,255,0.03);
-  }
-  .big-warning .danger {
-    color:var(--danger);font-weight:800;font-size:18px;
-  }
-  .big-warning .prank {
-    background:var(--danger);color:white;padding:6px 10px;border-radius:6px;font-size:12px;font-weight:700;
-    margin-left:auto;
-  }
-
-  .scanner{
-    display:flex;gap:18px;align-items:flex-start;
-    margin-top:8px;
-  }
-
-  .monitor{
-    flex:1;
-    min-height:200px;
-    background:linear-gradient(180deg, rgba(0,0,0,0.35), rgba(0,0,0,0.5));
-    border-radius:8px;padding:18px;border:1px solid rgba(255,255,255,0.02);
-    color:#9be6df;font-family:monospace;font-size:13px;overflow:auto;
-  }
-
-  .progress{
-    width:260px;
-  }
-  .progress .bar{
-    height:12px;background:linear-gradient(90deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
-    border-radius:999px;padding:3px;border:1px solid rgba(0,0,0,0.25);
-  }
-  .progress .bar > i{
-    display:block;height:8px;border-radius:999px;background:linear-gradient(90deg,var(--scan),#52e5ff);
-    width:0%; transition:width 400ms linear;
-  }
-  .controls{display:flex;gap:12px;margin-top:14px;align-items:center}
-  button{
-    background:#0b1418;border:1px solid rgba(255,255,255,0.03);color:#dff7f6;padding:10px 14px;border-radius:10px;
-    cursor:pointer;font-weight:700;letter-spacing:0.3px;
-  }
-  button.negative{background:transparent;color:var(--muted);border:1px dashed rgba(255,255,255,0.03)}
-  button.stop{background:var(--danger);color:white}
-  .small{font-size:12px;color:var(--muted);margin-top:10px}
-
-  /* fake blinking cursor */
-  .line::after{content:'';display:inline-block;width:10px;height:14px;margin-left:6px;background:linear-gradient(90deg,#0000,#fff);opacity:0.85;animation:blink 1s steps(2) infinite}
-  @keyframes blink{0%{opacity:1}50%{opacity:0}100%{opacity:1}}
-</style>
+  </style>
 </head>
 <body>
-  <div class="frame" role="dialog" aria-label="Prank window">
-    <div class="header">
-      <div class="logo">V</div>
+  <div class="container">
+    <header>
+      <div class="card" style="display:inline-block;padding:12px 16px;border-radius:12px;margin-right:12px;">
+        📘
+      </div>
       <div>
-        <h1>VELDANAVA SYSTEM CHECK</h1>
-        <p class="lead">Simulasi prank — ini BUKAN VIRUS. Pastikan target paham ini cuma bercanda.</p>
+        <h1>Belajar Matematika Dasar — Lengkap</h1>
+        <p class="lead">Operasi dasar: +, −, ×, ÷, pangkat, akar; ditambah penjelasan lingkaran. Developer: Azmil Bakhtiar.</p>
       </div>
-    </div>
+    </header><main style="margin-top:18px">
+  <div class="row">
+    <section class="card">
+      <h2>Ringkasan operasi</h2>
 
-    <div class="big-warning" aria-live="polite">
-      <div>
-        <div class="danger">WARNING: SIMULATED INFECTED DEVICE</div>
-        <div style="font-size:13px;color:var(--muted)">HALAMAN INI ADALAH PRANK & SIMULASI — NOT A REAL ATTACK</div>
-      </div>
-      <div class="prank">PRANK MODE</div>
-    </div>
-
-    <div class="scanner">
-      <div class="monitor" id="monitor" aria-hidden="false">
-        <div class="line" id="log">Initializing system scan...</div>
+      <div class="example">
+        <strong>Penjumlahan</strong>
+        <div class="steps"><small>Contoh: 1 + 1 = 2 — menggabungkan jumlah.</small></div>
       </div>
 
-      <div class="progress" aria-hidden="false">
-        <div style="font-size:13px;color:var(--muted);margin-bottom:8px">Scan progress</div>
-        <div class="bar"><i id="bar"></i></div>
-        <div class="controls">
-          <button id="startBtn">Start Simulation</button>
-          <button id="stopBtn" class="stop">Stop</button>
-          <button id="revealBtn" class="negative">This is a prank</button>
+      <div style="height:8px"></div>
+
+      <div class="example">
+        <strong>Pengurangan</strong>
+        <div class="steps"><small>Contoh: 2 − 1 = 1 — mengurangi dari jumlah.</small></div>
+      </div>
+
+      <div style="height:8px"></div>
+
+      <div class="example">
+        <strong>Perkalian</strong>
+        <div class="steps"><small>Contoh: 2 × 3 = 6 — penjumlahan berulang.</small></div>
+      </div>
+
+      <div style="height:8px"></div>
+
+      <div class="example">
+        <strong>Pembagian</strong>
+        <div class="steps"><small>Contoh: 6 ÷ 3 = 2 — membagi menjadi bagian sama.</small></div>
+      </div>
+
+      <h3 style="margin-top:16px">Pangkat</h3>
+      <div class="example"><strong>2² = 4, 3³ = 27</strong>
+        <div class="steps"><small>Pangkat (eksponen) berarti mengalikan bilangan dengan dirinya sendiri beberapa kali.</small></div>
+      </div>
+
+      <h3 style="margin-top:12px">Akar</h3>
+      <div class="example"><strong>√9 = 3</strong>
+        <div class="steps"><small>Akar kuadrat adalah nilai yang kali dirinya menghasilkan bilangan tersebut.</small></div>
+      </div>
+
+      <h3 style="margin-top:14px">Contoh singkat</h3>
+      <ul>
+        <li>1 + 1 = 2</li>
+        <li>2 − 1 = 1</li>
+        <li>2 × 2 = 4</li>
+        <li>4 ÷ 2 = 2</li>
+        <li>2³ = 8</li>
+        <li>√16 = 4</li>
+      </ul>
+
+      <section style="margin-top:12px">
+        <h3>Latihan singkat</h3>
+        <ol>
+          <li>Hitung: 3 + 4</li>
+          <li>Hitung: 5 − 2</li>
+          <li>Hitung: 3 × 3</li>
+          <li>Hitung: 12 ÷ 4</li>
+          <li>Hitung: √81</li>
+          <li>Hitung: 2⁴</li>
+        </ol>
+      </section>
+
+      <section style="margin-top:12px" class="card">
+        <h3>Lingkaran — Luas & Keliling</h3>
+        <div class="geom">
+          <svg width="220" height="220" viewBox="0 0 220 220" aria-hidden="true">
+            <defs><linearGradient id="g1" x1="0" x2="1"><stop offset="0" stop-color="#ffd8d0"/><stop offset="1" stop-color="#d0e8ff"/></linearGradient></defs>
+            <circle cx="110" cy="110" r="70" fill="url(#g1)" stroke="#cfe6f8" stroke-width="4" />
+            <line x1="110" y1="110" x2="180" y2="110" stroke="#064" stroke-width="2"/>
+            <text x="148" y="117" font-size="12" fill="#064">r</text>
+          </svg>
+
+          <div>
+            <p><strong>Rumus:</strong></p>
+            <p>Luas = π × r²</p>
+            <p>Keliling = 2 × π × r</p>
+            <p class="hint">Contoh: jika r = 5 → Luas ≈ 3.14×25 = 78.5, Keliling ≈ 2×3.14×5 = 31.4</p>
+          </div>
         </div>
-        <div class="small">Tip: Tekan "This is a prank" kapan aja untuk hentikan & tunjukkan disclaimer.</div>
+      </section>
+
+    </section>
+
+    <aside class="card">
+      <h3>Kalkulator interaktif</h3>
+      <p class="hint">Masukkan dua angka (untuk operasi biner) atau satu angka (untuk akar/pangkat) lalu pilih operasi.</p>
+
+      <div class="calc">
+        <label for="a">Angka pertama (a)</label>
+        <input id="a" type="text" value="1" placeholder="contoh: 5" />
+        <label for="b">Angka kedua (b) — kosongkan untuk akar atau pangkat tunggal</label>
+        <input id="b" type="text" value="1" placeholder="contoh: 2" />
+
+        <div class="row-buttons">
+          <button class="btn" id="add">+</button>
+          <button class="btn" id="sub">−</button>
+          <button class="btn" id="mul">×</button>
+          <button class="btn" id="div">÷</button>
+          <button class="btn" id="pow">Pangkat (a^b)</button>
+          <button class="btn" id="sqrt">Akar (√a)</button>
+          <button class="btn" id="circle">Luas/Keliling (r)</button>
+        </div>
+
+        <div id="result" class="result">Hasil akan muncul di sini.</div>
       </div>
-    </div>
+
+      <h4 style="margin-top:14px">Tips cepat</h4>
+      <ul>
+        <li>Isi hanya <em>a</em> dan tekan <strong>Akar</strong> untuk √a.</li>
+        <li>Untuk pangkat isi <em>a</em> dan <em>b</em> lalu tekan <strong>Pangkat</strong>.</li>
+        <li>Untuk lingkaran, isi <em>a</em> sebagai radius (r) lalu tekan <strong>Luas/Keliling</strong>.</li>
+      </ul>
+
+    </aside>
   </div>
 
-<script>
-  const monitor = document.getElementById('monitor');
-  const log = document.getElementById('log');
-  const bar = document.getElementById('bar');
-  const startBtn = document.getElementById('startBtn');
-  const stopBtn = document.getElementById('stopBtn');
-  const revealBtn = document.getElementById('revealBtn');
+  <section style="margin-top:18px" class="card">
+    <h3>Catatan belajar</h3>
+    <p class="hint">Mulai dari contoh konkret (benda nyata), lalu beralih ke simbol. Perbanyak latihan sederhana, gunakan gambar untuk visualisasi.</p>
+  </section>
 
-  let running = false;
-  let pct = 0;
-  let tick;
+</main>
 
-  function appendLine(text){
-    const el = document.createElement('div');
-    el.textContent = text;
-    el.style.marginTop = '6px';
-    el.className = 'line';
-    monitor.appendChild(el);
-    monitor.scrollTop = monitor.scrollHeight;
-  }
+<footer>
+  <div class="card" style="padding:12px;margin-top:12px;display:flex;justify-content:space-between;align-items:center">
+    <div><strong>Developer:</strong> Azmil — <span class="hint">Belajar Matematika Dasar v1.3</span></div>
+    <div style="font-size:12px;color:var(--muted)">© 2025</div>
+  </div>
+</footer>
 
-  function randomItem(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+  </div>  <script>
+    const toNum = (s)=>{ const t = s.toString().trim(); if(t==='') return NaN; return Number(t); }
+    const aEl = document.getElementById('a');
+    const bEl = document.getElementById('b');
+    const resEl = document.getElementById('result');
 
-  const fakeTargets = [
-    'Camera module','Contacts DB','SMS store','Media cache','System logs','App sandbox','Network stack',
-    'Bluetooth module','Location provider','Battery manager','Chrome cache','Gallery thumbnails'
-  ];
-  const fakeMsgs = [
-    'corrupting chunks','encrypting temp','spawning background workers','exfiltrating metadata',
-    'overwriting thumbnails','patching boot configs','modifying notification hooks','saturating CPU cores',
-    'suppressing user alerts','injecting overlay','writing ransom marker','obfuscating signature'
-  ];
+    function setRes(html){ resEl.innerHTML = html; }
 
-  function step(){
-    if(!running) return;
-    pct += Math.floor(Math.random() * 6) + 2;
-    if(pct>100) pct=100;
-    bar.style.width = pct + '%';
-    appendLine(`[${new Date().toLocaleTimeString()}] ${randomItem(fakeTargets)} -> ${randomItem(fakeMsgs)}`);
-    if(pct>=100){
-      appendLine('[SIMULATION COMPLETE] No real damage. This was a harmless prank.');
-      running = false;
-      clearInterval(tick);
-    }
-  }
+    document.getElementById('add').addEventListener('click', ()=>{
+      const a = toNum(aEl.value), b = toNum(bEl.value);
+      if(Number.isNaN(a)||Number.isNaN(b)){ setRes('Masukkan angka valid untuk a dan b.'); return; }
+      setRes(`<strong>${a} + ${b} = ${a+b}</strong>`);
+    });
 
-  startBtn.addEventListener('click', ()=>{
-    if(running) return;
-    running = true;
-    pct = 0;
-    bar.style.width = '0%';
-    monitor.innerHTML = '';
-    appendLine('Starting simulated scan...');
-    tick = setInterval(step, 800);
-  });
+    document.getElementById('sub').addEventListener('click', ()=>{
+      const a = toNum(aEl.value), b = toNum(bEl.value);
+      if(Number.isNaN(a)||Number.isNaN(b)){ setRes('Masukkan angka valid untuk a dan b.'); return; }
+      setRes(`<strong>${a} − ${b} = ${a-b}</strong>`);
+    });
 
-  stopBtn.addEventListener('click', ()=>{
-    running = false;
-    clearInterval(tick);
-    appendLine('[SIMULATION STOPPED] Press "This is a prank" to reveal.');
-  });
+    document.getElementById('mul').addEventListener('click', ()=>{
+      const a = toNum(aEl.value), b = toNum(bEl.value);
+      if(Number.isNaN(a)||Number.isNaN(b)){ setRes('Masukkan angka valid untuk a dan b.'); return; }
+      setRes(`<strong>${a} × ${b} = ${a*b}</strong>`);
+    });
 
-  revealBtn.addEventListener('click', ()=>{
-    running = false;
-    clearInterval(tick);
-    appendLine('*** THIS IS A PRANK — NOT A REAL VIRUS ***');
-    appendLine('Made by: You (be responsible). Share only with friends who know it\'s a joke.');
-    bar.style.width = '0%';
-  });
+    document.getElementById('div').addEventListener('click', ()=>{
+      const a = toNum(aEl.value), b = toNum(bEl.value);
+      if(Number.isNaN(a)||Number.isNaN(b)){ setRes('Masukkan angka valid untuk a dan b.'); return; }
+      if(b===0){ setRes('Tidak bisa membagi dengan nol!'); return; }
+      setRes(`<strong>${a} ÷ ${b} = ${a/b}</strong>`);
+    });
 
-  // Keyboard shortcut: press Esc to stop
-  document.addEventListener('keydown', (e)=>{
-    if(e.key === 'Escape'){
-      running=false; clearInterval(tick);
-      appendLine('[ESC] Simulation halted.');
-    }
-  });
-</script>
-</body>
-      </html>
+    document.getElementById('pow').addEventListener('click', ()=>{
+      const a = toNum(aEl.value), b = toNum(bEl.value);
+      if(Number.isNaN(a)||Number.isNaN(b)){ setRes('Masukkan angka valid untuk a dan b.'); return; }
+      setRes(`<strong>${a}^${b} = ${Math.pow(a,b)}</strong>`);
+    });
+
+    document.getElementById('sqrt').addEventListener('click', ()=>{
+      const a = toNum(aEl.value);
+      if(Number.isNaN(a)){ setRes('Masukkan angka valid pada a (untuk akar).'); return; }
+      if(a<0){ setRes('Akar kuadrat bilangan negatif bukan bilangan real.'); return; }
+      setRes(`<strong>√${a} = ${Math.sqrt(a)}</strong>`);
+    });
+
+    document.getElementById('circle').addEventListener('click', ()=>{
+      const r = toNum(aEl.value);
+      if(Number.isNaN(r)){ setRes('Masukkan radius r pada kolom a.'); return; }
+      if(r<0){ setRes('Radius tidak boleh negatif.'); return; }
+      const pi = Math.PI;
+      const luas = pi * r * r;
+      const kel = 2 * pi * r;
+      setRes(`<strong>r = ${r} → Luas = ${luas.toFixed(4)}, Keliling = ${kel.toFixed(4)}</strong>`);
+    });
+  </script></body>
+         </html>
