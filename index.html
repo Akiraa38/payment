@@ -1,92 +1,210 @@
-<!DOCTYPE html>
-<html lang="id">
+ <!doctype html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pembayaran QR DANA</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #0f172a, #1e293b);
-      color: white;
-      text-align: center;
-      padding: 20px;
-      animation: fadeIn 1s ease-in-out;
-    }
-    .container {
-      max-width: 420px;
-      margin: auto;
-      background: rgba(255, 255, 255, 0.05);
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
-      animation: slideUp 1s ease-in-out;
-    }
-    img.qr {
-      width: 100%;
-      max-width: 350px;
-      border-radius: 12px;
-      animation: zoomIn 1s ease-in-out;
-    }
-    .amount {
-      font-size: 1.5em;
-      margin-top: 10px;
-      font-weight: bold;
-      color: #38bdf8;
-    }
-    .note {
-      margin-top: 10px;
-      font-size: 0.9em;
-      color: #94a3b8;
-    }
-    .btn, .copy-btn {
-      display: inline-block;
-      margin-top: 15px;
-      padding: 10px 20px;
-      background: #38bdf8;
-      color: #0f172a;
-      font-weight: bold;
-      border-radius: 8px;
-      text-decoration: none;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-    .btn:hover, .copy-btn:hover {
-      background: #0ea5e9;
-    }
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>!! WARNING !!</title>
+<style>
+  :root{
+    --bg:#0b0f13;
+    --scan:#22c1c3;
+    --danger:#ff3b30;
+    --muted:#9aa6b2;
+  }
+  html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;}
+  body{
+    background: radial-gradient(ellipse at top left,#071018 0%, #020405 60%);
+    color: #e6eef3;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .frame{
+    width:92%;
+    max-width:920px;
+    border-radius:12px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+    box-shadow: 0 10px 40px rgba(2,6,10,0.7);
+    padding:28px;
+    position:relative;
+    overflow:hidden;
+  }
 
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-    @keyframes slideUp {
-      from { transform: translateY(30px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
-    }
-    @keyframes zoomIn {
-      from { transform: scale(0.8); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
-    }
-  </style>
+  .header{
+    display:flex;align-items:center;gap:14px;margin-bottom:16px;
+  }
+  .logo{
+    width:56px;height:56px;border-radius:10px;background:linear-gradient(135deg,var(--scan),#8be6c9);
+    display:flex;align-items:center;justify-content:center;color:#002f2f;font-weight:800;font-size:18px;
+    box-shadow: 0 6px 24px rgba(34,193,195,0.12), inset 0 -6px 10px rgba(0,0,0,0.12);
+  }
+
+  h1{margin:0;font-size:20px;letter-spacing:0.6px}
+  p.lead{margin:6px 0 0;color:var(--muted);font-size:13px}
+
+  .big-warning{
+    margin:18px 0;
+    background: linear-gradient(90deg, rgba(255,59,48,0.12), rgba(34,193,195,0.06));
+    border-radius:8px;padding:16px;display:flex;align-items:center;gap:14px;
+    border:1px solid rgba(255,255,255,0.03);
+  }
+  .big-warning .danger {
+    color:var(--danger);font-weight:800;font-size:18px;
+  }
+  .big-warning .prank {
+    background:var(--danger);color:white;padding:6px 10px;border-radius:6px;font-size:12px;font-weight:700;
+    margin-left:auto;
+  }
+
+  .scanner{
+    display:flex;gap:18px;align-items:flex-start;
+    margin-top:8px;
+  }
+
+  .monitor{
+    flex:1;
+    min-height:200px;
+    background:linear-gradient(180deg, rgba(0,0,0,0.35), rgba(0,0,0,0.5));
+    border-radius:8px;padding:18px;border:1px solid rgba(255,255,255,0.02);
+    color:#9be6df;font-family:monospace;font-size:13px;overflow:auto;
+  }
+
+  .progress{
+    width:260px;
+  }
+  .progress .bar{
+    height:12px;background:linear-gradient(90deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+    border-radius:999px;padding:3px;border:1px solid rgba(0,0,0,0.25);
+  }
+  .progress .bar > i{
+    display:block;height:8px;border-radius:999px;background:linear-gradient(90deg,var(--scan),#52e5ff);
+    width:0%; transition:width 400ms linear;
+  }
+  .controls{display:flex;gap:12px;margin-top:14px;align-items:center}
+  button{
+    background:#0b1418;border:1px solid rgba(255,255,255,0.03);color:#dff7f6;padding:10px 14px;border-radius:10px;
+    cursor:pointer;font-weight:700;letter-spacing:0.3px;
+  }
+  button.negative{background:transparent;color:var(--muted);border:1px dashed rgba(255,255,255,0.03)}
+  button.stop{background:var(--danger);color:white}
+  .small{font-size:12px;color:var(--muted);margin-top:10px}
+
+  /* fake blinking cursor */
+  .line::after{content:'';display:inline-block;width:10px;height:14px;margin-left:6px;background:linear-gradient(90deg,#0000,#fff);opacity:0.85;animation:blink 1s steps(2) infinite}
+  @keyframes blink{0%{opacity:1}50%{opacity:0}100%{opacity:1}}
+</style>
 </head>
 <body>
-  <div class="container">
-    <h1>Pembayaran via DANA</h1>
-    <p>Scan QR Code di bawah untuk melakukan pembayaran</p>
-    <img src="https://files.catbox.moe/wulurg.jpg" alt="QR Code DANA" class="qr">
-    <div class="amount" id="dana-number">0895704333683</div>
-    <button class="copy-btn" onclick="copyDana()">Copy Nomor DANA</button>
-    <div class="note">Pastikan nominal benar sebelum bayar</div>
-    <a class="btn" href="https://link.dana.id/qr/0895704333683" target="_blank">Buka DANA</a>
+  <div class="frame" role="dialog" aria-label="Prank window">
+    <div class="header">
+      <div class="logo">V</div>
+      <div>
+        <h1>VELDANAVA SYSTEM CHECK</h1>
+        <p class="lead">Simulasi prank — ini BUKAN VIRUS. Pastikan target paham ini cuma bercanda.</p>
+      </div>
+    </div>
+
+    <div class="big-warning" aria-live="polite">
+      <div>
+        <div class="danger">WARNING: SIMULATED INFECTED DEVICE</div>
+        <div style="font-size:13px;color:var(--muted)">HALAMAN INI ADALAH PRANK & SIMULASI — NOT A REAL ATTACK</div>
+      </div>
+      <div class="prank">PRANK MODE</div>
+    </div>
+
+    <div class="scanner">
+      <div class="monitor" id="monitor" aria-hidden="false">
+        <div class="line" id="log">Initializing system scan...</div>
+      </div>
+
+      <div class="progress" aria-hidden="false">
+        <div style="font-size:13px;color:var(--muted);margin-bottom:8px">Scan progress</div>
+        <div class="bar"><i id="bar"></i></div>
+        <div class="controls">
+          <button id="startBtn">Start Simulation</button>
+          <button id="stopBtn" class="stop">Stop</button>
+          <button id="revealBtn" class="negative">This is a prank</button>
+        </div>
+        <div class="small">Tip: Tekan "This is a prank" kapan aja untuk hentikan & tunjukkan disclaimer.</div>
+      </div>
+    </div>
   </div>
 
-  <script>
-    function copyDana() {
-      const danaNumber = document.getElementById("dana-number").innerText;
-      navigator.clipboard.writeText(danaNumber).then(() => {
-        alert("Nomor DANA berhasil disalin!");
-      });
+<script>
+  const monitor = document.getElementById('monitor');
+  const log = document.getElementById('log');
+  const bar = document.getElementById('bar');
+  const startBtn = document.getElementById('startBtn');
+  const stopBtn = document.getElementById('stopBtn');
+  const revealBtn = document.getElementById('revealBtn');
+
+  let running = false;
+  let pct = 0;
+  let tick;
+
+  function appendLine(text){
+    const el = document.createElement('div');
+    el.textContent = text;
+    el.style.marginTop = '6px';
+    el.className = 'line';
+    monitor.appendChild(el);
+    monitor.scrollTop = monitor.scrollHeight;
+  }
+
+  function randomItem(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+  const fakeTargets = [
+    'Camera module','Contacts DB','SMS store','Media cache','System logs','App sandbox','Network stack',
+    'Bluetooth module','Location provider','Battery manager','Chrome cache','Gallery thumbnails'
+  ];
+  const fakeMsgs = [
+    'corrupting chunks','encrypting temp','spawning background workers','exfiltrating metadata',
+    'overwriting thumbnails','patching boot configs','modifying notification hooks','saturating CPU cores',
+    'suppressing user alerts','injecting overlay','writing ransom marker','obfuscating signature'
+  ];
+
+  function step(){
+    if(!running) return;
+    pct += Math.floor(Math.random() * 6) + 2;
+    if(pct>100) pct=100;
+    bar.style.width = pct + '%';
+    appendLine(`[${new Date().toLocaleTimeString()}] ${randomItem(fakeTargets)} -> ${randomItem(fakeMsgs)}`);
+    if(pct>=100){
+      appendLine('[SIMULATION COMPLETE] No real damage. This was a harmless prank.');
+      running = false;
+      clearInterval(tick);
     }
-  </script>
+  }
+
+  startBtn.addEventListener('click', ()=>{
+    if(running) return;
+    running = true;
+    pct = 0;
+    bar.style.width = '0%';
+    monitor.innerHTML = '';
+    appendLine('Starting simulated scan...');
+    tick = setInterval(step, 800);
+  });
+
+  stopBtn.addEventListener('click', ()=>{
+    running = false;
+    clearInterval(tick);
+    appendLine('[SIMULATION STOPPED] Press "This is a prank" to reveal.');
+  });
+
+  revealBtn.addEventListener('click', ()=>{
+    running = false;
+    clearInterval(tick);
+    appendLine('*** THIS IS A PRANK — NOT A REAL VIRUS ***');
+    appendLine('Made by: You (be responsible). Share only with friends who know it\'s a joke.');
+    bar.style.width = '0%';
+  });
+
+  // Keyboard shortcut: press Esc to stop
+  document.addEventListener('keydown', (e)=>{
+    if(e.key === 'Escape'){
+      running=false; clearInterval(tick);
+      appendLine('[ESC] Simulation halted.');
+    }
+  });
+</script>
 </body>
-  </html>
+      </html>
