@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>KidGuard Watch</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;height:100%;background:#000;overflow:hidden;font-family:'Courier New',monospace;}
+
+#wrap{position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#020617;}
+
+video#live{width:100%;height:100%;object-fit:cover;display:block;}
+
+/* ── Overlay UI ── */
+#overlay{position:fixed;inset:0;pointer-events:none;z-index:10;}
+
+/* Top bar */
+#topbar{
+  position:absolute;top:0;left:0;right:0;
+  padding:14px 18px;
+  display:flex;align-items:center;justify-content:space-between;
+  background:linear-gradient(to bottom,rgba(2,6,23,.85),transparent);
+}
+#logo{display:flex;align-items:center;gap:8px;}
+#logo-icon{width:22px;height:22px;color:#3b82f6;}
+#logo-text{font-size:13px;color:#7dd3fc;letter-spacing:.12em;}
+#status-pill{
+  display:flex;align-items:center;gap:6px;
+  background:rgba(0,0,0,.5);border:1px solid #1e3a5f;
+  border-radius:20px;padding:5px 12px;
+  font-size:11px;letter-spacing:.08em;color:#64748b;
+  transition:all .3s;
+}
+#status-pill.live{border-color:#22c55e;color:#4ade80;}
+#status-pill.live #dot{background:#22c55e;box-shadow:0 0 6px #22c55e;}
+#status-pill.connecting{border-color:#f59e0b;color:#fbbf24;}
+#status-pill.connecting #dot{background:#f59e0b;animation:blink .8s infinite;}
+#status-pill.offline{border-color:#ef4444;color:#f87171;}
+#status-pill.offline #dot{background:#ef4444;}
+#dot{width:7px;height:7px;border-radius:50%;background:#64748b;flex-shrink:0;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.2;}}
+
+/* Bottom bar */
+#botbar{
+  position:absolute;bottom:0;left:0;right:0;
+  padding:16px 18px 28px;
+  display:flex;align-items:flex-end;justify-content:space-between;
+  gap:12px;
+  background:linear-gradient(to top,rgba(2,6,23,.9),transparent);
+}
+#peer-wrap{flex:1;display:flex;flex-direction:column;gap:6px;}
+#peer-label{font-size:10px;color:#334155;letter-spacing:.1em;text-transform:uppercase;}
+#peer-row{display:flex;gap:8px;}
+#peer-input{
+  flex:1;background:rgba(0,0,0,.6);border:1px solid #1e3a5f;
+  color:#7dd3fc;padding:9px 12px;border-radius:6px;
+  font-family:'Courier New',monospace;font-size:12px;outline:none;
+  letter-spacing:.04em;
+}
+#peer-input:focus{border-color:#3b82f6;}
+#peer-input::placeholder{color:#1e3a5f;}
+#btn-connect{
+  background:transparent;border:1px solid #3b82f6;color:#7dd3fc;
+  font-family:'Courier New',monospace;font-size:12px;letter-spacing:.1em;
+  padding:9px 16px;border-radius:6px;cursor:pointer;white-space:nowrap;
+  pointer-events:auto;transition:all .15s;
+}
+#btn-connect:active{background:rgba(59,130,246,.15);}
+
+/* Snapshot button */
+#btn-snap{
+  pointer-events:auto;
+  width:54px;height:54px;border-radius:50%;
+  background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.2);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;flex-shrink:0;transition:all .15s;
+}
+#btn-snap:active{background:rgba(255,255,255,.2);transform:scale(.92);}
+#btn-snap svg{color:#fff;width:22px;height:22px;}
+
+/* Timestamp */
+#ts{
+  position:absolute;bottom:80px;right:18px;
+  font-size:10px;color:rgba(255,255,255,.2);letter-spacing:.06em;
+}
+
+/* No-signal screen */
+#nosignal{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:16px;background:#020617;
+  transition:opacity .3s;
+}
+#nosignal.hide{opacity:0;pointer-events:none;}
+.ns-icon{color:#1e3a5f;width:56px;height:56px;margin-bottom:4px;}
+.ns-title{font-size:15px;color:#334155;letter-spacing:.12em;}
+.ns-sub{font-size:11px;color:#1e293b;letter-spacing:.06em;text-align:center;padding:0 32px;line-height:1.8;}
+
+/* Snapshot flash */
+#flash{position:fixed;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:50;transition:opacity .08s;}
+
+/* Snapshot preview */
+#preview{
+  position:fixed;bottom:100px;right:16px;
+  width:90px;height:70px;border-radius:6px;overflow:hidden;
+  border:1px solid #3b82f6;display:none;z-index:20;
+  box-shadow:0 0 16px rgba(59,130,246,.3);
+}
+#preview img{width:100%;height:100%;object-fit:cover;}
+
+/* Canvas for snapshot */
+#snap-canvas{display:none;position:fixed;top:-9999px;}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <video id="live" autoplay playsinline muted></video>
+
+  <div id="nosignal">
+    <svg class="ns-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+      <path d="M15 10l4.553-2.069A1 1 0 0121 8.87v6.26a1 1 0 01-1.447.894L15 14M3 8a1 1 0 011-1h10a1 1 0 011 1v8a1 1 0 01-1 1H4a1 1 0 01-1-1V8z"/>
+    </svg>
+    <div class="ns-title">MENUNGGU SINYAL</div>
+    <div class="ns-sub">Masukkan Peer ID anak di bawah<br>atau tunggu notif Telegram</div>
+  </div>
+</div>
+
+<div id="overlay">
+  <div id="topbar">
+    <div id="logo">
+      <svg id="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        <circle cx="12" cy="11" r="2"/><path d="M12 13v3"/>
+      </svg>
+      <span id="logo-text">KIDGUARD WATCH</span>
+    </div>
+    <div id="status-pill" class="offline">
+      <div id="dot"></div>
+      <span id="status-txt">OFFLINE</span>
+    </div>
+  </div>
+
+  <div id="ts"></div>
+
+  <div id="botbar">
+    <div id="peer-wrap">
+      <div id="peer-label">Peer ID Anak</div>
+      <div id="peer-row">
+        <input id="peer-input" type="text" placeholder="Dari notif Telegram..." autocomplete="off" autocorrect="off" spellcheck="false">
+        <button id="btn-connect" onclick="doConnect()">▶ LIVE</button>
+      </div>
+    </div>
+    <button id="btn-snap" title="Screenshot" onclick="takeSnap()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
+        <circle cx="12" cy="13" r="4"/>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<div id="flash"></div>
+<div id="preview"><img id="preview-img" src=""></div>
+<canvas id="snap-canvas"></canvas>
+
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script>
+const liveVid   = document.getElementById('live');
+const nosignal  = document.getElementById('nosignal');
+const pill      = document.getElementById('status-pill');
+const statusTxt = document.getElementById('status-txt');
+const tsEl      = document.getElementById('ts');
+const flash     = document.getElementById('flash');
+const preview   = document.getElementById('preview');
+const previewImg= document.getElementById('preview-img');
+const snapCnv   = document.getElementById('snap-canvas');
+
+let myPeer = null;
+let currentCall = null;
+let tsTimer = null;
+let reconnectTimer = null;
+let targetPeerId = null;
+
+function setStatus(state, txt) {
+  pill.className = state;
+  statusTxt.textContent = txt;
+}
+
+function showStream(stream) {
+  liveVid.srcObject = stream;
+  nosignal.classList.add('hide');
+  setStatus('live', '● LIVE');
+  startTs();
+}
+
+function startTs() {
+  clearInterval(tsTimer);
+  tsTimer = setInterval(() => {
+    const now = new Date();
+    tsEl.textContent = now.toLocaleDateString('id-ID') + '  ' +
+      now.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+  }, 1000);
+}
+
+function initPeer() {
+  if (myPeer && !myPeer.destroyed) myPeer.destroy();
+
+  myPeer = new Peer({
+    config: { iceServers: [
+      { urls: 'stun:stun.l.google.com:19302' },
+      { urls: 'stun:stun1.l.google.com:19302' }
+    ]}
+  });
+
+  myPeer.on('error', () => {
+    setStatus('offline', 'ERROR');
+    scheduleReconnect();
+  });
+
+  myPeer.on('disconnected', () => {
+    setStatus('connecting', 'RECONNECT...');
+    myPeer.reconnect();
+  });
+
+  return myPeer;
+}
+
+function callChild(peerId) {
+  if (!peerId) return;
+  targetPeerId = peerId;
+  setStatus('connecting', 'CONNECTING...');
+
+  const peer = myPeer || initPeer();
+
+  const tryCall = () => {
+    if (peer.destroyed) return;
+    try {
+      const dummyStream = null;
+      currentCall = peer.call(peerId, createDummyStream(), {sdpTransform: s => s});
+      currentCall.on('stream', stream => {
+        showStream(stream);
+        clearTimeout(reconnectTimer);
+      });
+      currentCall.on('close', () => {
+        setStatus('offline', 'TERPUTUS');
+        liveVid.srcObject = null;
+        nosignal.classList.remove('hide');
+        clearInterval(tsTimer);
+        scheduleReconnect();
+      });
+      currentCall.on('error', () => scheduleReconnect());
+    } catch(e) { scheduleReconnect(); }
+  };
+
+  if (peer.open) tryCall();
+  else peer.on('open', tryCall);
+}
+
+function createDummyStream() {
+  const cnv = document.createElement('canvas');
+  cnv.width = 1; cnv.height = 1;
+  return cnv.captureStream ? cnv.captureStream(1) : new MediaStream();
+}
+
+function scheduleReconnect() {
+  clearTimeout(reconnectTimer);
+  if (!targetPeerId) return;
+  reconnectTimer = setTimeout(() => {
+    setStatus('connecting', 'RECONNECT...');
+    initPeer();
+    callChild(targetPeerId);
+  }, 4000);
+}
+
+function doConnect() {
+  const id = document.getElementById('peer-input').value.trim();
+  if (!id) return;
+  initPeer();
+  callChild(id);
+}
+
+function takeSnap() {
+  if (!liveVid.srcObject) return;
+  snapCnv.width = liveVid.videoWidth || 640;
+  snapCnv.height = liveVid.videoHeight || 480;
+  snapCnv.getContext('2d').drawImage(liveVid, 0, 0);
+
+  flash.style.opacity = '0.7';
+  setTimeout(() => { flash.style.opacity = '0'; }, 200);
+
+  snapCnv.toBlob(blob => {
+    const url = URL.createObjectURL(blob);
+    previewImg.src = url;
+    preview.style.display = 'block';
+    setTimeout(() => { preview.style.display = 'none'; URL.revokeObjectURL(url); }, 4000);
+
+    const a = document.createElement('a');
+    a.href = url; a.download = 'kidguard-' + Date.now() + '.jpg';
+    a.click();
+  }, 'image/jpeg', 0.9);
+}
+
+document.getElementById('peer-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doConnect();
+});
+
+// Auto-connect from URL param ?p=PEER_ID
+const urlP = new URLSearchParams(location.search).get('p');
+if (urlP) {
+  document.getElementById('peer-input').value = urlP;
+  initPeer();
+  callChild(urlP);
+}
+</script>
+</body>
+</html>
